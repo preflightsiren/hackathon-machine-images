@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# This is a sample script to be configured and copied in /etc/rc.d/init.d
+
+# Those are some environmental variables to configure jumpin
+
+APP_ROOT=/opt/jumpin
+PORT=7001
+
+# source function library
+. /lib/lsb/init-functions
+
+start()
+{
+	cd $APP_ROOT && NODE_ENV=production PORT=$PORT node_modules/.bin/coffee server.coffee
+}
+
+stop()
+{
+	kill `pgrep -f "coffee"`
+}
+
+restart() {
+	stop
+	start
+}
+
+status() {
+	if [ $(pgrep -f "coffee") ]; then
+		echo " * status: started"
+		exit 0
+	else
+		echo " * status: stopped"
+		exit 1
+	fi
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		restart
+		;;
+	status)
+		status
+		;;
+esac

@@ -1,0 +1,51 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": "",
+    "aws_ami_id": "ami-5f8a1365",
+    "rev": "{{env `rev`}}"
+  },
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "scripts/jumpin",
+      "destination": "/tmp/jumpin"
+    },
+    {
+      "type": "file",
+      "source": "scripts/jumpin.conf",
+      "destination": "/tmp/jumpin.conf"
+    },
+    {
+      "type": "file",
+      "source": "jumpin/jumpin-{{user `rev`}}.tar.gz",
+      "destination": "/tmp/jumpin.tar.gz"
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/nodejs.sh"
+      ],
+      "override": {
+        "amazon-ebs": {
+          "execute_command": "echo 'ubuntu' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
+        }
+      }
+    }
+  ],
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "ap-southeast-2",
+    "source_ami": "{{user `aws_ami_id`}}",
+    "instance_type": "t1.micro",
+    "ssh_username": "ubuntu",
+    "ami_name": "packer-jumpin-website-{{user `rev`}}-{{timestamp}}",
+    "tags": {
+      "OS_version":"Ubuntu13.10",
+      "role":"jumpin-website",
+      "rev":"{{user `rev`}}"
+    }
+  }]
+}
